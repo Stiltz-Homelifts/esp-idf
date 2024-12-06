@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include "esp_log.h"
 #include "esp_event.h"
 #include "nvs_flash.h"
 #include "esp_openthread.h"
@@ -83,5 +84,15 @@ void app_main(void)
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     ESP_ERROR_CHECK(esp_vfs_eventfd_register(&eventfd_config));
+
+
+/* MAKE SURE THE SDKCONFIG is setup as follows
+CONFIG_OPENTHREAD_UART_PIN_MANUAL=y
+CONFIG_OPENTHREAD_UART_RX_PIN=22
+CONFIG_OPENTHREAD_UART_TX_PIN=23
+*/
+   ESP_LOGI("DEBUG", "UART RX PIN = %d", CONFIG_OPENTHREAD_UART_RX_PIN) ;
+   ESP_LOGI("DEBUG", "UART TX PIN = %d", CONFIG_OPENTHREAD_UART_TX_PIN) ;
+
     xTaskCreate(ot_task_worker, "ot_rcp_main", 3072, xTaskGetCurrentTaskHandle(), 5, NULL);
 }
