@@ -597,6 +597,7 @@ static esp_err_t sleep_modem_ble_mac_modem_state_init(uint8_t extra)
         .cbs     = { .create = { .handle = sleep_modem_ble_mac_retention_init, .arg = &retention_args } },
         .depends = BIT(SLEEP_RETENTION_MODULE_BT_BB)
     };
+    ESP_LOGI("ANDY", "sleep_modem_ble_mac_modem_state_init - %u", extra) ;
     esp_err_t err = sleep_retention_module_init(SLEEP_RETENTION_MODULE_BLE_MAC, &init_param);
     if (err == ESP_OK) {
         err = sleep_retention_module_allocate(SLEEP_RETENTION_MODULE_BLE_MAC);

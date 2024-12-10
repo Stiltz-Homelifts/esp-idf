@@ -596,10 +596,13 @@ uint32_t IRAM_ATTR sleep_retention_get_created_modules(void)
 
 esp_err_t sleep_retention_module_init(sleep_retention_module_t module, sleep_retention_module_init_param_t *param)
 {
+    ESP_LOGI("ANDY", "sleep_retention_module_init.1") ;
     if (module < SLEEP_RETENTION_MODULE_MIN || module > SLEEP_RETENTION_MODULE_MAX) {
+        ESP_LOGI("ANDY", "sleep_retention_module_init.2") ;
         return ESP_ERR_INVALID_ARG;
     }
     if (param == NULL || param->cbs.create.handle == NULL) {
+        ESP_LOGI("ANDY", "sleep_retention_module_init.3") ;
         return ESP_ERR_INVALID_ARG;
     }
     if (s_retention.lock == NULL) {
@@ -609,6 +612,7 @@ esp_err_t sleep_retention_module_init(sleep_retention_module_t module, sleep_ret
         _lock_init_recursive(&s_retention.lock);
         if (s_retention.lock == NULL) {
             ESP_LOGE(TAG, "Create sleep retention lock failed");
+            ESP_LOGI("ANDY", "sleep_retention_module_init.4") ;
             return ESP_ERR_NO_MEM;
         }
     }
@@ -616,6 +620,7 @@ esp_err_t sleep_retention_module_init(sleep_retention_module_t module, sleep_ret
     esp_err_t err = ESP_OK;
     _lock_acquire_recursive(&s_retention.lock);
     if (module_is_created(module) || module_is_inited(module)) {
+        ESP_LOGI("ANDY", "sleep_retention_module_init.5") ;
         err = ESP_ERR_INVALID_STATE;
     } else {
         sleep_retention_module_object_ctor(&s_retention.instance[module], &param->cbs);
@@ -624,6 +629,7 @@ esp_err_t sleep_retention_module_init(sleep_retention_module_t module, sleep_ret
         s_retention.inited_modules |= module_num2map(module);
     }
     _lock_release_recursive(&s_retention.lock);
+    ESP_LOGI("ANDY", "sleep_retention_module_init.6 - err=%d", err) ;
     return err;
 }
 
@@ -683,7 +689,9 @@ static esp_err_t sleep_retention_passive_module_allocate(sleep_retention_module_
 
 esp_err_t sleep_retention_module_allocate(sleep_retention_module_t module)
 {
+    ESP_LOGI("ANDY", "sleep_retention_module_allocate.1") ;
     if (module < SLEEP_RETENTION_MODULE_MIN || module > SLEEP_RETENTION_MODULE_MAX) {
+        ESP_LOGI("ANDY", "sleep_retention_module_allocate.2 - module=%d", module) ;
         return ESP_ERR_INVALID_ARG;
     }
 
@@ -697,6 +705,7 @@ esp_err_t sleep_retention_module_allocate(sleep_retention_module_t module)
                     set_reference(&s_retention.instance[i], module);
                     if (module_is_passive(&s_retention.instance[i])) { /* the callee ensures this module is inited */
                         err = sleep_retention_passive_module_allocate(i);
+                        ESP_LOGI("ANDY", "sleep_retention_module_allocate.3 err=%d", err) ;
                     }
                 }
             }
@@ -704,15 +713,19 @@ esp_err_t sleep_retention_module_allocate(sleep_retention_module_t module)
                 sleep_retention_callback_t fn = s_retention.instance[module].cbs.create.handle;
                 if (fn) {
                     err = (*fn)(s_retention.instance[module].cbs.create.arg);
+                    ESP_LOGI("ANDY", "sleep_retention_module_allocate.4 err=%d", err) ;
                 }
             }
         } else {
             err = ESP_ERR_INVALID_STATE;
+            ESP_LOGI("ANDY", "sleep_retention_module_allocate.5") ;
         }
     } else {
         err = ESP_ERR_NOT_ALLOWED;
+        ESP_LOGI("ANDY", "sleep_retention_module_allocate.6") ;
     }
     _lock_release_recursive(&s_retention.lock);
+    ESP_LOGI("ANDY", "sleep_retention_module_allocate.7 - err=%d", err) ;
     return err;
 }
 
